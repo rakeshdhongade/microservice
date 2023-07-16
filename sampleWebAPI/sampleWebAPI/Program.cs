@@ -1,6 +1,7 @@
 using MongoDB.Driver;
 using sampleWebAPI;
 using sampleWebAPI.Models;
+using sampleWebAPI.src.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,19 +14,19 @@ builder.Services.Configure<MonogDbSettings>(builder.Configuration.GetSection(nam
 builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
 {
     //this code will call when someone ask object of IMongoDatabase
-    //TODO: if we AddTransient then every time will it call this place?
     var mongoDBSettings = builder.Configuration.GetSection(nameof(MonogDbSettings)).Get<MonogDbSettings>();
     var mongoclient = new MongoClient(mongoDBSettings.ConnectionString);
     return mongoclient.GetDatabase(mongoDBSettings.DatabaseName);
 });
 
-//builder.Services.AddSingleton<UserModel>(sp=>
-//{
-//    return new UserModel(sp.GetService<IMongoDatabase>());
-//});
+builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
 
 
-//var userModel = builder.Configuration.Get<UserModel>();
+//registering UserModel as singleton
+// Trasient will always gives new instance
+// AddSocpe will give same intnace for a whithin the request
+builder.Services.AddSingleton<UserModel>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -33,6 +34,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+//retiving the instance from container
+var usermodel = app.Services.GetRequiredService<UserModel>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
