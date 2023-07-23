@@ -9,11 +9,6 @@ namespace sampleWebAPI.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
     private readonly ILogger<UserController> _logger;
     private readonly IUsersRepository _usersRepository;
 
@@ -23,26 +18,23 @@ public class UserController : ControllerBase
         this._usersRepository = usersRepository;
     }
 
-    [HttpGet(Name = "User")]
-    public IEnumerable<UserDto> Get()
+    [HttpGet(Name = "Users")]
+    public async Task<IEnumerable<UserDto>> Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new UserDto
-        {
-            Guid = Guid.NewGuid(),
-            Name = index.ToString(),
-            Mobile = "+91 12345678"+index.ToString(),
-            VehicalNumber ="KA05 34354",
-            Document = null,
-            ProfilePhoto = null
-        })
-        .ToArray();
+        return await _usersRepository.GetAllUsersAsync();
     }
 
     [HttpPost]
-    public async Task<IActionResult> PostAsynch(UserDto userDto)
+    public async Task<IActionResult> PostAsync([FromForm] UserDto userDto)
     {
-       await _usersRepository.AddUserAsync(userDto);
-
-        return NoContent();
+        try
+        {
+            await _usersRepository.AddUserAsync(userDto);
+        }
+        catch (Exception)
+        {
+            _logger.Log(LogLevel.Error, "exception while upload the file");
+        }
+        return Ok();
     }
 }
