@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using sampleWebAPI.Models;
 using sampleWebAPI.src.Repository;
 
 namespace sampleWebAPI.Controllers;
@@ -18,10 +16,15 @@ public class UserController : ControllerBase
         this._usersRepository = usersRepository;
     }
 
-    [HttpGet(Name = "Users")]
+    [HttpGet]
     public async Task<IEnumerable<UserDto>> Get()
     {
         return await _usersRepository.GetAllUsersAsync();
+    }
+    [HttpGet("{guid}")]
+    public async Task<UserDto> Get(Guid guid)
+    {
+        return await _usersRepository.GetUserAsync(guid);
     }
 
     [HttpPost]
@@ -29,6 +32,8 @@ public class UserController : ControllerBase
     {
         try
         {
+            _logger.Log(LogLevel.Information, $"Document.ContentDisposition : {userDto.Document.ContentDisposition}," +
+                $" {userDto.Document.ContentType}"); 
             await _usersRepository.AddUserAsync(userDto);
         }
         catch (Exception)
@@ -36,5 +41,18 @@ public class UserController : ControllerBase
             _logger.Log(LogLevel.Error, "exception while upload the file");
         }
         return Ok();
+    }
+
+    [HttpPut("{guid}")]
+    public async Task Put(Guid guid, [FromBody] UserDto user)
+    {
+        await _usersRepository.UpdateUserAsync(guid, user);
+    }
+
+    // DELETE api/<VehicleController>/5
+    [HttpDelete("{guid}")]
+    public async Task Delete(Guid guid)
+    {
+        await _usersRepository.DeleteUserAsync(guid);
     }
 }

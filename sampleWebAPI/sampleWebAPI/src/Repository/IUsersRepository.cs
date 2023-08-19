@@ -1,9 +1,9 @@
-﻿namespace sampleWebAPI.src.Repository
+﻿namespace sampleWebAPI.src.Repository;
+public interface IUsersRepository
 {
-    public interface IUsersRepository
-    {
-        public Task AddUserAsync(UserDto user);
-
-        public Task<IEnumerable<UserDto>> GetAllUsersAsync();
-    }
+    Task AddUserAsync(UserDto user);
+    Task<IEnumerable<UserDto>> GetAllUsersAsync();
+    Task<UserDto> GetUserAsync(Guid guid);
+    Task UpdateUserAsync(Guid guid, UserDto user);
+    Task DeleteUserAsync(Guid guid);
 }

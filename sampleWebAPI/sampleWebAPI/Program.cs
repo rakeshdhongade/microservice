@@ -1,3 +1,6 @@
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using sampleWebAPI;
 using sampleWebAPI.Models;
@@ -6,7 +9,8 @@ using sampleWebAPI.src.Repository;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
 //tell application to load MonogDbSettings from appSettings into MonogDbSettings class
 builder.Services.Configure<MonogDbSettings>(builder.Configuration.GetSection(nameof(MonogDbSettings)));
 
@@ -20,6 +24,7 @@ builder.Services.AddSingleton<IMongoDatabase>(serviceProvider =>
 });
 
 builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
+builder.Services.AddSingleton<IVehicleRepository, VehicleRepository>();
 
 
 //registering UserModel as singleton
